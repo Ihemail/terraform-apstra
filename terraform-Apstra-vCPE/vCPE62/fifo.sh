@@ -14,3 +14,19 @@ ssh -NL 53800:localhost:53800 ihazra@10.32.192.47 | socat UDP4-LISTEN:51840,fork
 echo "Hello World!!"
 
 #server$ socat -T10 TCP4-LISTEN:52800,fork UDP4:switch:51830
+
+#------------------------------------------------------------------------
+@ qnc-css-lnx02:~> pwd
+/homes/ihazra
+qnc-css-lnx02:~> cat fifo_53800.sh 
+#!/bin/bash
+
+rm -rf /tmp/fifo1
+mkfifo /tmp/fifo1
+
+nc -l -p 53800 < /tmp/fifo1 | nc -u 10.220.10.202 51820 > /tmp/fifo1 &
+# socat -T10 TCP4-LISTEN:52800,fork UDP4:switch:51830
+
+
+echo "Hello World!!"
+qnc-css-lnx02:~> 
