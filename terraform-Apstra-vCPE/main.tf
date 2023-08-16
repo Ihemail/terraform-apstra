@@ -176,7 +176,8 @@ resource "proxmox_vm_qemu" "lede-171-vCPE1" {
     # ssh root@192.168.97.10 ssh -NL 53800:localhost:53800 ihazra@10.32.192.47 | socat UDP4-LISTEN:51840,fork TCP4:localhost:53800 &"
   }
   provisioner "local-exec" {
-    command = "ssh ihazra@10.32.192.47 sh fifo_53800.sh && echo Start ssh-tunnel provisioning @css-lnx02 Date: %date%  Time: %time%"
+    command = "scp vCPE62/fifo_port_53800.sh ihazra@10.32.192.47:/homes/ihazra && ssh ihazra@10.32.192.47 chmod +x fifo_port_53800.sh && ssh ihazra@10.32.192.47 sh fifo_port_53800.sh && echo Start ssh-tunnel provisioning @css-lnx02 Date: %date%  Time: %time%"
+    #command = "ssh ihazra@10.32.192.47 sh fifo_53800.sh && echo Start ssh-tunnel provisioning @css-lnx02 Date: %date%  Time: %time%"
     # && ssh root@192.168.97.10 sh fifo.sh"
     # ssh root@192.168.97.10 ssh -NL 53800:localhost:53800 ihazra@10.32.192.47 | socat UDP4-LISTEN:51840,fork TCP4:localhost:53800 &"
   }
