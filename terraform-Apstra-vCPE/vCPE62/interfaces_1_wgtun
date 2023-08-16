@@ -1,0 +1,29 @@
+
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fd45:e0ff:c0e0::/48'
+
+config interface 'lan'
+        option type 'bridge'
+        option ifname 'eth1'
+        option proto 'static'
+        option ipaddr '192.168.10.1'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+
+config interface 'lan2'
+        option type 'bridge'
+        option ifname 'eth0'
+        option proto 'static'
+        option ipaddr '192.168.0.62'
+        option netmask '255.255.255.0'
+        #option gateway '192.168.0.1'
+
+config interface 'wan'
+        option ifname 'eth2'
+        option proto 'dhcp'

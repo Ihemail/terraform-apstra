@@ -1,0 +1,122 @@
+
+config interface 'lan'
+        option type 'bridge'
+        option ifname 'eth1'
+        option proto 'static'
+        option ipaddr '192.168.1.1'
+        option netmask '255.255.255.0'
+
+config interface 'wan'
+        option ifname 'eth0'
+        option proto 'dhcp'
+
+config interface 'wg0'
+        option proto 'wireguard'
+        option private_key 'SP6wMJuAmLpkjNCVLuODOKOoqOelYzcvrmK5UUkqUn4='    #**wgserver0.key : 'EIutz00ACu9iwSzGEX14MyCyxCR8VSctJRvIunTBTFU='
+        option listen_port '51820'
+        list addresses '10.100.100.1/32'
+
+config wireguard_wg0 'wgclient0'
+        option public_key 'KCuOWbIJNuXmRx7oMiihiDIiFKmC/yNzWjO+fqSX3EQ='
+        option route_allowed_ips '1'                                     
+        option persistent_keepalive '25'   
+        list allowed_ips '10.100.100.0/30'
+        list allowed_ips '192.168.97.0/24'
+
+config interface 'grelan'
+        option type 'bridge'
+        option auto 'eth3'
+        option ifname 'eth3'
+        option proto 'static'
+        option ipaddr '10.1.1.10'
+        option netmask '255.255.255.0'
+
+
+root@lede_server_1:~# cat /etc/config/firewall 
+config defaults
+        option syn_flood        1
+        option input            ACCEPT
+        option output           ACCEPT
+        option forward          REJECT
+
+config zone
+        option name             lan
+        list   network          'lan'
+        option input            ACCEPT
+        option output           ACCEPT
+        option forward          ACCEPT
+
+config zone
+        option name             wan
+        list   network          'wan'
+        list   network          'wan6'
+        option input            REJECT
+        option output           ACCEPT
+        option forward          REJECT
+        option masq             1
+        option mtu_fix          1
+
+config forwarding
+        option src              lan
+        option dest             wan
+-------------------
+config rule 'ssh'
+        option name 'Allow-SSH'
+        option src 'wan'
+        option dest_port '22'
+        option proto 'tcp'
+        option target 'ACCEPT'
+
+config rule 'www'
+        option name 'Allow-WWW-WAN'
+        option src 'wan'
+        option dest_port '80'
+        option proto 'tcp'
+        option target 'ACCEPT'
+
+config rule 'wg'
+        option name 'Allow-WireGuard'
+        option src 'wan'
+        option dest_port '51820'
+        option proto 'udp'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Allow-Ping'
+        option src 'wan'
+        option proto 'icmp'
+        option icmp_type 'echo-request'
+        option family 'ipv4'
+        option target 'ACCEPT'
+
+wgcliwnt0: LEDE_61
+-------------------------------------
+config rule 'ssh'                                  
+        option name 'Allow-SSH'                    
+        option src 'wan'                              
+        option dest_port '22'                       
+        option proto 'tcp'                             
+        option target 'ACCEPT'            
+                                      
+config rule 'www-wan'                 
+        option name 'Allow-WWW-WAN'       
+        option src 'wan'                     
+        option dest_port '80'               
+        option proto 'tcp'                          
+        option target 'ACCEPT'        
+                                        
+config rule 'wg'                        
+        option name 'Allow-WireGuard'       
+        option src 'wan'                  
+        #option dest_port '52820'                      
+        option dest_port '*'                  
+        option proto 'udp tcp'               
+        option target 'ACCEPT'            
+                                                   
+config rule                             
+        option name 'Allow-Ping'           
+        option src 'wan'                 
+        option proto 'icmp'                 
+        option icmp_type 'echo-request'         
+        option family 'ipv4'                   
+        option target 'ACCEPT'    

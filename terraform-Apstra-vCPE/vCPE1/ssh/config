@@ -1,0 +1,43 @@
+
+GatewayPorts yes
+
+Host q-pod5
+  HostName q-pod05-vmm.englab.juniper.net
+  ProxyCommand ssh ihazra@10.32.192.47 -W %h:%p
+
+Host q-pod22
+  HostName q-pod22-vmm.englab.juniper.net
+  ProxyCommand ssh ihazra@10.32.192.47 -W %h:%p
+
+Host css2
+  HostName 10.32.192.47
+  GatewayPorts yes
+  User ihazra
+  IdentityFile ~/.ssh/id_rsa
+
+Host css3
+  HostName 10.32.192.48
+  User ihazra
+  IdentityFile ~/.ssh/id_rsa
+
+Host qnc-css-lnx02
+  HostName 10.32.192.47
+  User ihazra
+  IdentityFile ~/.ssh/id_rsa
+  #Pass junipernetwork
+
+Host centos_1
+  HostName 10.53.72.156
+  User root
+  IdentityFile ~/.ssh/id_rsa
+  ProxyJump qnc-css-lnx02
+  #ProxyCommand ssh -qX 10.32.192.47 nc %h %p
+  
+#Host vCPE1
+#  Hostname 10.53.76.24
+#  IdentityFile ~/.ssh/id_rsa
+#  ProxyJump qnc-css-lnx02
+#  Proxycommand ssh -C -W %h:%p -q -A 10.32.192.47
+
+Host 10.53.76.24
+    Proxycommand ssh -C -W %h:%p -q -A 10.32.192.47

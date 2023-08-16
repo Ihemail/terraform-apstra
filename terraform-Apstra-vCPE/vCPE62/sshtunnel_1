@@ -1,0 +1,25 @@
+#
+# password authentication is not possible, public key authentication must be used.
+# set "option IdentityFile" to he file from which the identity (private key) for RSA or DSA authentication is read.  
+# The default is ~/.ssh/identity for protocol version 1, and ~/.ssh/id_rsa and ~/.ssh/id_dsa for protocol version 2.
+# ssh will also try to load certificate information from the filename obtained by appending -cert.pub to identity filenames.
+#
+
+config server csslnx02
+       option user                     ihazra
+       option hostname                 10.32.192.47
+       option port                     22
+       option retrydelay               5
+       option IdentityFile             /root/.ssh/id_rsa
+       option LogLevel                 INFO
+       option ServerAliveCountMax      3
+       option ServerAliveInterval      30
+
+
+config tunnelL csslnx02sshtunnel53800                                                                
+       option server           csslnx02                                              
+       option localaddress     *                                                 
+       option localport        53800                                                
+       option remoteaddress    localhost                     
+       option remoteport       53800   
+

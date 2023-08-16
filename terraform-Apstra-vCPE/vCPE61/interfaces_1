@@ -1,0 +1,64 @@
+
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fd45:00cc:0000::/48'
+
+config interface 'lan'
+        option type 'bridge'
+        option ifname 'eth0'
+        option proto 'static'
+        option ipaddr '192.168.10.2'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+
+config interface 'wan'
+        option ifname 'eth2'
+        option proto 'dhcp'
+#       option proto 'static'
+#       option ipaddr '192.168.97.61'
+#       option netmask '255.255.255.0'
+#       option gateway '192.168.97.62'
+#       option dns 192.168.97.62
+
+config interface 'wg0'
+        option proto 'wireguard'
+        option private_key 'kNBBf0thK7jKb+gvmFG8AcQ8Te+cMkTwFslGx7whlWc='
+        option listen_port '52820'
+        list addresses '10.100.100.2/32'
+
+config wireguard_wg0 'wgserver'
+        option public_key 'u4WOUMg7qXqZofubumdPy2FaOIshpQcWEv50pYFmG20='
+#       option endpoint_host '10.220.10.202'
+#       option endpoint_port '51820'
+        option endpoint_host '192.168.97.10'
+        option endpoint_port '51840'
+        option route_allowed_ips '1'
+        option persistent_keepalive '25'
+        list allowed_ips '10.100.100.0/30'
+        list allowed_ips '10.220.30.0/24'
+        list allowed_ips '10.220.2.0/24'
+        list allowed_ips '10.220.3.0/24'
+        list allowed_ips '10.220.9.0/24'
+        list allowed_ips '10.220.11.0/24'
+        list allowed_ips '10.220.12.0/24'
+
+#config interface 'lan3'
+#       option type bridge
+#        option ifname 'eth3'
+#        option proto 'static'
+#        option ipaddr '192.168.97.61'
+#        option netmask '255.255.255.0'
+
+config interface 'grelan'
+        option type bridge
+        option ifname 'eth3'
+        option proto 'static'
+        #option ipaddr '10.1.1.1'
+        option ipaddr '192.168.98.10'
+        option netmask '255.255.255.0'
+

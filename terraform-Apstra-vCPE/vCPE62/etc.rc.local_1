@@ -1,0 +1,6 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+sleep 60 && socat UDP4-LISTEN:51840,fork TCP4:localhost:53800 &
+
+exit 0
