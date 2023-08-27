@@ -28,7 +28,7 @@ vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
         /   /                 \       /                 \   \
        /   /                   \     /                   \   \
      [Leaf1]                   [leaf2]                   [Leaf3]
-  std-001-leaf1             std-001-leaf2             std-001-leaf3
+  std-001-leaf1             std-002-leaf1             std-003-leaf1
         |                         |                         | 
         |                         |                         |
  Single-Server-1           Single-Server-2           Single-Server-3
