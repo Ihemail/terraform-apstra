@@ -13,6 +13,25 @@ AOS version: 4.1.2
 
 vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
+### VMM Lab Topology
+```
+-------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
+ 
+			 spine1                            spine2             
+            [Spine1]                          [Spine2]
+             / \   \                           /   / \
+            /   \   \-----------------------------\   \
+           /     \                           /   / \   \
+          /   /-----------------------------/   /   \   \
+         /   /     \                           /     \   \
+        /   /       \-------\         /-------/       \   \
+   	   /   /                 \       /                 \   \
+  	  /   /                   \     /                   \   \
+    [Leaf1]                   [leaf2]                   [Leaf3]
+ std-001-leaf1             std-001-leaf2             std-001-leaf3
+
+```
+
 ### Install the Provider
 Refer to the project's [main README](../README.md) to get the provider installed
 on your system.
