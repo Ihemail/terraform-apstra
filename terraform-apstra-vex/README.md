@@ -15,20 +15,24 @@ vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
 ### VMM Lab Topology
 ```
--------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
- 
-			 spine1                            spine2             
-            [Spine1]                          [Spine2]
-             / \   \                           /   / \
-            /   \   \-----------------------------\   \
-           /     \                           /   / \   \
-          /   /-----------------------------/   /   \   \
-         /   /     \                           /     \   \
-        /   /       \-------\         /-------/       \   \
-   	   /   /                 \       /                 \   \
-  	  /   /                   \     /                   \   \
-    [Leaf1]                   [leaf2]                   [Leaf3]
- std-001-leaf1             std-001-leaf2             std-001-leaf3
+--------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
+
+              spine1                            spine2             
+             [Spine1]                          [Spine2]
+              / \   \                           /   / \
+             /   \   \-----------------------------\   \
+            /     \                           /   / \   \
+           /   /-----------------------------/   /   \   \
+          /   /     \                           /     \   \
+         /   /       \-------\         /-------/       \   \
+        /   /                 \       /                 \   \
+       /   /                   \     /                   \   \
+     [Leaf1]                   [leaf2]                   [Leaf3]
+  std-001-leaf1             std-001-leaf2             std-001-leaf3
+        |                         |                         | 
+        |                         |                         |
+ Single-Server-1           Single-Server-2           Single-Server-3
+ (std-001-sys001)          (std-002-sys001)          (std-003-sys001)
 
 ```
 
