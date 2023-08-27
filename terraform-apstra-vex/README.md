@@ -33,7 +33,6 @@ vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
         |                         |                         |
  Single-Server-1           Single-Server-2           Single-Server-3
  (std-001-sys001)          (std-002-sys001)          (std-003-sys001)
-
 ```
 
 ### Install the Provider
