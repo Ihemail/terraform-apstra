@@ -6,8 +6,11 @@ currently published with the v4.1.2. Apstra CloudLabs "Juniper Customer Lab".
 This demo is tested against Apstra 4.1.2. 
 The VMM Lab config/template is attched in the project folder. The Terraform plugin works with Apstra 4.1.2, but some of the baked-in object names (logical devices, interface maps) changed between
 revisions of, so it's smoother sailing with the 4.1.2 revision of the lab topology.
+
 Lab Node used vEX(EX9214) with version: 22.2R2.10
+
 AOS version: 4.1.2
+
 vQFX(QFX10K) Version: 20.2R2-S3.5  pfe:20.2R1.10
 
 ### Install the Provider
