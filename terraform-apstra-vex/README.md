@@ -13,7 +13,7 @@ AOS version: 4.1.2
 
 vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
-### VMM Lab Topology
+### VMM Lab Topology [vEX-9214 - L2 Virtual]
 ```
 --------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
 
@@ -37,21 +37,55 @@ vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
 ### Install the Provider
 Refer to the project's [main README](../README.md) to get the provider installed
-on your system.
+on your system or to the centos_1 server as below.
+Update the main.tf with the Switch details(mgmt. IP & Device_Key).
 
-### Copy the files in this directory to your local system
+### Copy the main.tf file from local system to centos_1 server in the ~/terraform directory
 This might be the easiest way:
 ```shell
-git clone https://github.com/Juniper/terraform-provider-apstra.git
-cd terraform-provider-apstra/lab_guide_demo
+laptop:github\terraform\terraform-apstra> scp main.tf root@centos1:terraform/
+
+Centos1:> yum install -y yum-utils
+Centos1:> yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+Centos1:> yum -y install terraform
+Centos1:> yum update
+Centos1:> mkdir terraform
+Centos1:> cd terraform
+Centos1:> terraform init
+Centos1:> terraform validate
+Centos1:> terraform plan
+Centos1:> terraform apply -auto-approve
+Centos1:> terraform destroy -auto-approve
+
 ```
 
-### Configure the Provider
-Notes in [0_provider.tf](0_provider.tf) detail configuring the provider to talk
-to your VMM Lab instance.
+### Before applying terraform script update the base cofnig in vEX / vQFX-10K via cli
+```
+vEX-9214> cli
+  configure
+  set chassis evpn-vxlan-default-switch-support
+  set groups member0 system host-name <switch-host-name>
+  set system commit synchronize 
+  set system services netconf ssh 
+  delete groups global interfaces lo0 
+  delete groups global routing-options router-id 
+  commit and-quit
+  show chassis hardware
+  show interfaces fxp0 | grep Hardware 
+ 
+vQFX-10K> cli
+  configure
+  set groups member0 system host-name <switch-host-name>
+  set system services netconf ssh 
+  delete groups global interfaces lo0 
+  delete groups global routing-options router-id 
+  commit and-quit
+  show chassis hardware
+  show interfaces em0 | grep Hardware
 
-### Work through the files in numerical order
-Each terraform configuration file after `0_provider.tf` is 100% commented
-out. Work through the files in order, un-commenting one `resource` or
+```
+
+### Work through the files in numerical order for further customization
+Each terraform configuration file after provider config is 100% customizable. Work through the file main.tf in order, un-commenting/commenting one `resource` or
 `data`(source) at a time. Compare the results with the lab guide and with the
 Apstra web UI.
