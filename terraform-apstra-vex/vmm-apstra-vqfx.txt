@@ -1,0 +1,347 @@
+#include "/vmm/bin/common.defs"
+#include "/vmm/data/user_disks/vmxc/common.vmx.p3.defs"
+
+#define VMX_DISK basedisk "/vmm/data/user_disks/ihazra/contrail/vmx-re.vmdk";
+#define CENTOS7_base basedisk "/vmm/data/user_disks/ihazra/contrail/centos7-300g.vmdk";
+#define COSIM_DISK basedisk "/vmm/data/user_disks/ihazra/contrail/vqfx-20.2R1.10-pfe-qemu.vmdk";
+//#define VQFX10_DISK basedisk "/vmm/data/user_disks/ihazra/contrail/jinstall-vqfx-10-f-20.2R1.10.vmdk";
+#define VQFX10_DISK basedisk "/vmm/data/user_disks/ihazra/contrail/jinstall-vqfx-10-f-20.2R2-S3.5.img";
+
+#define OPENWRT_base basedisk "/vmm/data/user_disks/ihazra/lede-disk0.vmdk";
+//#define AOS_SERVER_BASE basedisk "/vmm/data/user_disks/ihazra/images/aos_server_4.1.2-disk1.vmdk";
+#define AOS_SERVER_BASE basedisk "/vmm/data/user_disks/ihazra/images/aos_server_4.1.2.qcow2";
+//#define AOS_ZTP_BASE basedisk "/vmm/data/user_disks/ihazra/contrail/apstra-ztp-4.0.1.vmdk";
+#define CUMULUSVX_BASE basedisk "/vmm/data/user_disks/ihazra/contrail/cumulus-linux-3.7.13-vx-amd64.vmdk";
+
+config "Apstra_ZTP_DC_vQFX" {
+
+#undef VMX_CHASSIS_I2CID
+#undef VMX_CHASSIS_NAME
+#define VMX_CHASSIS_I2CID 21
+
+  vm "vm_aos_server" {
+    hostname "vm_aos_server";
+    AOS_SERVER_BASE
+    ncpus 16;
+    memory 16384;
+    setvar "qemu_args" "-cpu host,vmx=on";
+    setvar "boot_noveriexec"       "yes";
+    interface "em0" { bridge "external"; };
+    interface "em1" { bridge "ext_gw"; };
+    interface "em2" { bridge "externalp1"; };
+  };
+
+  vm "vm_centos_1" {
+    hostname "vm_centos_1";
+    CENTOS7_base
+    ncpus 4;
+    memory 8192;
+    setvar "qemu_args" "-cpu host,vmx=on";
+    setvar "boot_noveriexec"       "yes";
+    interface "em0" { bridge "external"; };
+    interface "em1" { bridge "ext_gw"; };
+    interface "em2" { bridge "externalp1"; };
+  };
+
+  vm "vm_openwrt_1" {
+    hostname "vm_openwrt_1";
+    OPENWRT_base
+    ncpus 1;
+    memory 128;
+    setvar "boot_noveriexec"       "yes";
+    interface "em0" { bridge "external"; };
+    interface "em1" { bridge "externalp1"; macaddr "00:00:00:ab:ab:11"; };
+    interface "em2" { bridge "leaf1p1"; };
+  };
+  vm "vm_openwrt_2" {
+    hostname "vm_openwrt_2";
+    OPENWRT_base
+    ncpus 1;
+    memory 128;
+    setvar "boot_noveriexec"       "yes";
+    interface "em0" { bridge "external"; };
+    interface "em1" { bridge "externalp1"; macaddr "00:00:00:ab:ab:22"; };
+    interface "em2" { bridge "leaf3p1"; };
+  };
+
+  vm "vm_openwrt_gw" {
+    hostname "vm_openwrt_gw";
+    OPENWRT_base
+    ncpus 4;
+    memory 256;
+    setvar "boot_noveriexec"       "yes";
+    interface "em0" { bridge "external"; };
+    interface "em1" { bridge "externalp1"; macaddr "00:00:00:ab:ab:66"; };
+    interface "em2" { bridge "ext_gw"; };
+  };
+
+  #undef VMX_CHASSIS_I2CID
+  #define VMX_CHASSIS_I2CID 48
+  #define VMX_CHASSIS_NAME vmx_host
+  VMX_CHASSIS_START()
+    VMX_RE_START(vmx_host, 0)
+        VMX_RE_INSTANCE(vmx_host, VMX_DISK, VMX_RE_I2CID, 0)
+    VMX_RE_END
+   VMX_MPC_START(vmx_host_MPC,0)
+        VMX_MPC_INSTANCE(vmx_host_MPC, VMX_DISK, VMX_MPC_I2CID, 0)
+          VMX_CONNECT(GE(0,0,0), ext_gw)
+          VMX_CONNECT(GE(0,0,1), external)
+          VMX_CONNECT(GE(0,0,2), leaf1p1)
+          VMX_CONNECT(GE(0,0,3), leaf1p2)
+          VMX_CONNECT(GE(0,0,4), leaf1p3)
+          VMX_CONNECT(GE(0,0,5), leaf2p1)
+          VMX_CONNECT(GE(0,0,6), leaf2p2)
+          VMX_CONNECT(GE(0,0,7), leaf2p3)
+          VMX_CONNECT(GE(0,0,8), leaf3p1)
+          VMX_CONNECT(GE(0,0,9), leaf3p2)
+          VMX_CONNECT(GE(0,0,10), leaf3p3)
+          VMX_CONNECT(GE(0,0,11), vmx_spine1)
+          VMX_CONNECT(GE(0,0,12), vmx_spine1)
+          VMX_CONNECT(GE(0,0,13), vmx_spine2)
+          VMX_CONNECT(GE(0,0,14), vmx_spine2)
+		  VMX_CONNECT(GE(0,0,15), spine3p1)
+    VMX_MPC_END
+  VMX_CHASSIS_END
+
+  #undef VMX_CHASSIS_NAME
+  #define VMX_CHASSIS_NAME vmx_1
+  VMX_CHASSIS_START()
+    VMX_RE_START(vmx_1, 0)
+        VMX_RE_INSTANCE(vmx_1, VMX_DISK, VMX_RE_I2CID, 0)
+    VMX_RE_END
+   VMX_MPC_START(vmx_1_MPC,0)
+        VMX_MPC_INSTANCE(vmx_1_MPC, VMX_DISK, VMX_MPC_I2CID, 0)
+          VMX_CONNECT(GE(0,0,0), ext_gw)
+          VMX_CONNECT(GE(0,0,1), cpe3p2)
+          VMX_CONNECT(GE(0,0,2), spine1p1)
+          VMX_CONNECT(GE(0,0,3), spine2p1)
+          VMX_CONNECT(GE(0,0,4), link_MX1-2)
+          VMX_CONNECT(GE(0,0,5), link_MX1-3)
+          VMX_CONNECT(GE(0,0,6), spine3p1)
+          VMX_CONNECT(XE(0,2,0), spine1p1)
+          VMX_CONNECT(XE(0,2,1), spine2p1)
+    VMX_MPC_END
+  VMX_CHASSIS_END
+
+  #undef VMX_CHASSIS_NAME
+  #define VMX_CHASSIS_NAME vmx_2
+  VMX_CHASSIS_START()
+    VMX_RE_START(vmx_2, 0)
+        VMX_RE_INSTANCE(vmx_2, VMX_DISK, VMX_RE_I2CID, 0)
+    VMX_RE_END
+   VMX_MPC_START(vmx_2_MPC,0)
+        VMX_MPC_INSTANCE(vmx_2_MPC, VMX_DISK, VMX_MPC_I2CID, 0)
+          VMX_CONNECT(GE(0,0,0), ext_gw)
+          VMX_CONNECT(GE(0,0,1), cpe3p2)
+          VMX_CONNECT(GE(0,0,2), spine1p2)
+          VMX_CONNECT(GE(0,0,3), spine2p2)
+          VMX_CONNECT(GE(0,0,4), link_MX1-2)
+          VMX_CONNECT(GE(0,0,5), link_MX2-3)
+          VMX_CONNECT(GE(0,0,6), spine3p1)
+          VMX_CONNECT(XE(0,2,0), spine1p2)
+          VMX_CONNECT(XE(0,2,1), spine2p2)
+    VMX_MPC_END
+  VMX_CHASSIS_END
+
+  #undef VMX_CHASSIS_NAME
+  #define VMX_CHASSIS_NAME vmx_3
+  VMX_CHASSIS_START()
+    VMX_RE_START(vmx_3, 0)
+        VMX_RE_INSTANCE(vmx_3, VMX_DISK, VMX_RE_I2CID, 0)
+    VMX_RE_END
+   VMX_MPC_START(vmx_3_MPC,0)
+        VMX_MPC_INSTANCE(vmx_3_MPC, VMX_DISK, VMX_MPC_I2CID, 0)
+          VMX_CONNECT(GE(0,0,0), ext_gw)
+          VMX_CONNECT(GE(0,0,1), link_MX1-3)
+          VMX_CONNECT(GE(0,0,2), link_MX2-3)
+          VMX_CONNECT(GE(0,0,3), spine3p1)
+          VMX_CONNECT(GE(0,0,4), spine3p1)
+          VMX_CONNECT(XE(0,2,0), spine3p1)
+    VMX_MPC_END
+  VMX_CHASSIS_END
+
+  vm "vqfx10k_spine1" {
+      hostname "vqfx10k_spine1";
+      VQFX10_DISK
+      setvar "boot_noveriexec" "YES";
+      setvar "qemu_args" "-smbios type=1,product=QFX10K-11";
+      VQFX_SYSTEST_CONFIG
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; macaddr "00:00:00:aa:aa:aa";};
+      interface "em1" { bridge "pecosim_bridge_1"; ipaddr "169.254.0.2"; };
+      interface "em2" { bridge "reserved_bridge"; };
+      interface "em3" { bridge "spine1_leaf1"; };
+      interface "em4" { bridge "spine1_leaf2"; };
+      interface "em5" { bridge "spine1_leaf3"; };
+      //interface "em6" { bridge "spine1p1"; };
+      //interface "em7" { bridge "spine1p2"; };
+	  interface "em13" { bridge "vmx_spine1"; };
+	  interface "em14" { bridge "vmx_spine2"; };
+  };
+  vm "vqfx10k_spine1_cosim" {
+      hostname "vqfx10k_spine1_cosim";
+      COSIM_DISK
+      memory 4096;
+      ncpus 4;
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; };
+      interface "em1" { bridge "pecosim_bridge_1"; ipaddr "169.254.0.1"; };
+  };
+
+  vm "vqfx10k_spine2" {
+      hostname "vqfx10k_spine2";
+      VQFX10_DISK
+      setvar "boot_noveriexec" "YES";
+      setvar "qemu_args" "-smbios type=1,product=QFX10K-11";
+      VQFX_SYSTEST_CONFIG
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; macaddr "00:00:00:aa:bb:bb"; };
+      interface "em1" { bridge "pecosim_bridge_2"; ipaddr "169.254.0.2"; };
+      interface "em2" { bridge "reserved_bridge"; };
+      interface "em3" { bridge "spine2_leaf1"; };
+      interface "em4" { bridge "spine2_leaf2"; };
+      interface "em5" { bridge "spine2_leaf3"; };
+      //interface "em6" { bridge "spine2p1"; };
+      //interface "em7" { bridge "spine2p2"; };
+	  interface "em13" { bridge "vmx_spine1"; };
+	  interface "em14" { bridge "vmx_spine2"; };
+  };
+  vm "vqfx10k_spine2_cosim" {
+      hostname "vqfx10k_spine2_cosim";
+      COSIM_DISK
+      memory 4096;
+      ncpus 4;
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; };
+      interface "em1" { bridge "pecosim_bridge_2"; ipaddr "169.254.0.1"; };
+  };
+
+  vm "vqfx10k_leaf1" {
+      hostname "vqfx10k_leaf1";
+      VQFX10_DISK
+      setvar "boot_noveriexec" "YES";
+      setvar "qemu_args" "-smbios type=1,product=QFX10K-11";
+      VQFX_SYSTEST_CONFIG
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; macaddr "00:00:00:aa:11:11"; };
+      interface "em1" { bridge "pecosim_bridge_3"; ipaddr "169.254.0.2"; };
+      interface "em2" { bridge "reserved_bridge"; };
+      interface "em3" { bridge "spine1_leaf1"; };
+      interface "em4" { bridge "spine2_leaf1"; };
+      interface "em5" { bridge "leaf1p1"; };
+      interface "em6" { bridge "leaf1p2"; };
+      interface "em7" { bridge "leaf1p3"; };
+      interface "em9" { bridge "spine1p1"; };
+      interface "em10" { bridge "spine1p2"; };
+  };
+  vm "vqfx10k_leaf1_cosim" {
+      hostname "vqfx10k_leaf1_cosim";
+      COSIM_DISK
+      memory 4096;
+      ncpus 4;
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; };
+      interface "em1" { bridge "pecosim_bridge_3"; ipaddr "169.254.0.1"; };
+  };
+
+  vm "vqfx10k_leaf2" {
+      hostname "vqfx10k_leaf2";
+      VQFX10_DISK
+      setvar "boot_noveriexec" "YES";
+      setvar "qemu_args" "-smbios type=1,product=QFX10K-11";
+      VQFX_SYSTEST_CONFIG
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; macaddr "00:00:00:aa:22:22"; };
+      interface "em1" { bridge "pecosim_bridge_4"; ipaddr "169.254.0.2"; };
+      interface "em2" { bridge "reserved_bridge"; };
+      interface "em3" { bridge "spine1_leaf2"; };
+      interface "em4" { bridge "spine2_leaf2"; };
+      interface "em5" { bridge "leaf2p1"; };
+      interface "em6" { bridge "leaf2p2"; };
+      interface "em7" { bridge "leaf2p3"; };
+      interface "em8" { bridge "leaf2p4"; };
+      interface "em9" { bridge "spine2p1"; };
+      interface "em10" { bridge "spine2p2"; };
+  };
+  vm "vqfx10k_leaf2_cosim" {
+      hostname "vqfx10k_leaf2_cosim";
+      COSIM_DISK
+      memory 4096;
+      ncpus 4;
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; };
+      interface "em1" { bridge "pecosim_bridge_4"; ipaddr "169.254.0.1"; };
+  };
+
+  vm "vqfx10k_leaf3" {
+      hostname "vqfx10k_leaf3";
+      VQFX10_DISK
+      setvar "boot_noveriexec" "YES";
+      setvar "qemu_args" "-smbios type=1,product=QFX10K-11";
+      VQFX_SYSTEST_CONFIG
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "external"; macaddr "00:00:00:aa:33:33"; };
+      interface "em1" { bridge "pecosim_bridge_5"; ipaddr "169.254.0.2"; };
+      interface "em2" { bridge "reserved_bridge"; };
+      interface "em3" { bridge "spine1_leaf3"; };
+      interface "em4" { bridge "spine2_leaf3"; };
+      interface "em5" { bridge "leaf3p1"; };
+      interface "em6" { bridge "leaf3p2"; };
+      interface "em7" { bridge "leaf3p3"; };
+      interface "em8" { bridge "leaf4p1"; };
+      interface "em9" { bridge "leaf4p2"; };
+  };
+  vm "vqfx10k_leaf3_cosim" {
+      hostname "vqfx10k_leaf3_cosim";
+      COSIM_DISK
+      memory 4096;
+      ncpus 4;
+      // Note: Don't change destination paths below
+      interface "em0" { bridge "externalp1"; };
+      interface "em1" { bridge "pecosim_bridge_5"; ipaddr "169.254.0.1"; };
+  };
+
+
+  bridge "pecosim_bridge_1" {};
+  bridge "pecosim_bridge_2" {};
+  bridge "pecosim_bridge_3" {};
+  bridge "pecosim_bridge_4" {};
+  bridge "pecosim_bridge_5" {};
+  bridge "pecosim_bridge_6" {};
+  bridge "pecosim_bridge_7" {};
+  bridge "reserved_bridge" {};
+  bridge "spine1p1" {};
+  bridge "spine1p2" {};
+  bridge "spine2p1" {};
+  bridge "spine2p2" {};
+  bridge "spine3p1" {};
+  bridge "spine1_leaf1" {};
+  bridge "spine1_leaf2" {};
+  bridge "spine1_leaf3" {};
+  bridge "spine2_leaf1" {};
+  bridge "spine2_leaf2" {};
+  bridge "spine2_leaf3" {};
+  bridge "leaf1p1" {};
+  bridge "leaf1p2" {};
+  bridge "leaf1p3" {};
+  bridge "leaf1p4" {};
+  bridge "leaf2p1" {};
+  bridge "leaf2p2" {};
+  bridge "leaf2p3" {};
+  bridge "leaf2p4" {};
+  bridge "leaf3p1" {};
+  bridge "leaf3p2" {};
+  bridge "leaf3p3" {};
+  bridge "leaf3p4" {};
+  bridge "leaf4p1" {};
+  bridge "leaf4p2" {};
+  bridge "vmx_spine1" {};
+  bridge "vmx_spine2" {};
+  bridge "link_MX1-2" {};
+  bridge "link_MX1-3" {};
+  bridge "link_MX2-3" {};
+  bridge "cpe3p2" {};
+  bridge "externalp1" {};
+  bridge "ext_gw" {};
+PRIVATE_BRIDGES
+};

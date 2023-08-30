@@ -1,4 +1,4 @@
-# Apstra VMM Lab Guide Demo
+# Apstra Lab Guide Demo
 This directory contains an example project which follows the [Apstra Lab Guide](https://cloudlabs.apstra.com/labguide/Cloudlabs/4.1.2/lab1-junos/lab1-junos-0_intro.html)
 currently published with the v4.1.2. Apstra CloudLabs "Juniper Customer Lab".
 
@@ -13,7 +13,7 @@ AOS version: 4.1.2
 
 vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
-### VMM Lab Topology [vEX-9214 - L2 Virtual]
+### VMM Lab Topology
 ```
 --------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
 
@@ -47,7 +47,7 @@ laptop:github\terraform\terraform-apstra> scp main.tf root@centos1:terraform/
 
 Centos1:> yum install -y yum-utils
 Centos1:> yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-Centos1:> yum -y install terraform
+Centos1:> yum -y install terraform expect
 Centos1:> yum update
 Centos1:> mkdir terraform
 Centos1:> cd terraform
@@ -60,11 +60,12 @@ Centos1:> terraform destroy -auto-approve
 ```
 
 ### Before applying terraform script update the base cofnig in vEX / vQFX-10K via cli
+### (Specific to VMM Environment and already in-buit into the terraform scripts)
 ```
 vEX-9214> cli
   configure
-  set chassis evpn-vxlan-default-switch-support
   set groups member0 system host-name <switch-host-name>
+  set chassis evpn-vxlan-default-switch-support
   set system commit synchronize 
   set system services netconf ssh 
   delete groups global interfaces lo0 
@@ -84,6 +85,9 @@ vQFX-10K> cli
   show interfaces em0 | grep Hardware
 
 ```
+### Create Agent Profile "profile_juniper_vqfx" from Apstra Web UI with login credential of vEX/vQFX switches
+Login to Apstra Web UI: 
+1. Create Agent Profile named "profile_juniper_vqfx" with login credential of vEX/vQFX switches before executing the terraform script.
 
 ### Work through the files in numerical order for further customization
 Each terraform configuration file after provider config is 100% customizable. Work through the file main.tf in order, un-commenting/commenting one `resource` or
