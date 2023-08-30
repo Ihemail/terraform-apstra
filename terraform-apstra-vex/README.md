@@ -83,7 +83,6 @@ vQFX-10K> cli
   commit and-quit
   show chassis hardware
   show interfaces em0 | grep Hardware
-
 ```
 ### Create Agent Profile "profile_juniper_vqfx" from Apstra Web UI with login credential of vEX/vQFX switches
 Login to Apstra Web UI: 
