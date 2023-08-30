@@ -1,4 +1,4 @@
-# Apstra Lab Guide Demo
+# Apstra VMM Lab Guide Demo
 This directory contains an example project which follows the [Apstra Lab Guide](https://cloudlabs.apstra.com/labguide/Cloudlabs/4.1.2/lab1-junos/lab1-junos-0_intro.html)
 currently published with the v4.1.2. Apstra CloudLabs "Juniper Customer Lab".
 
