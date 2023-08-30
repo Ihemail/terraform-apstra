@@ -70,13 +70,13 @@ This demo is tested against Apstra 4.1.2.
 The VMM Lab config/template is attched in the project folder. The Terraform plugin works with Apstra 4.1.2, but some of the baked-in object names (logical devices, interface maps) changed between
 revisions of, so it's smoother sailing with the 4.1.2 revision of the lab topology. Lab Node used:
 
-vEX(EX9214) version: 22.2R2.10
+vEX(EX9214) version: 22.2R2.10 / 22.3R2-S2.6
 
 AOS version: 4.1.2
 
 vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
 
-### VMM Lab Topology [vEX-9214 - L2 Virtual]
+### VMM Lab Topology L2 Virtual (vEX-9214/vQFX10k)
 ```
 --------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
 
@@ -98,6 +98,31 @@ vQFX(QFX10K) version: 20.2R2-S3.5  pfe:20.2R1.10
  (std-001-sys001)          (std-002-sys001)          (std-003-sys001)
 ```
 
+### VMM Lab Topology L3 ESI (vEX-9214/vQFX10k)
+```
+--------------------mgmt. Network(switch:em0/fxp0)-------------------[AOS Server]
+
+              spine1                            spine2             
+             [Spine1]                          [Spine2]
+              / \   \                           /   / \
+             /   \   \                         /   /   \			  
+            /     \   \-----------------------------\   \
+           /       \                         /   /   \   \
+          /   /-----------------------------/   /     \   \
+         /   /       \                         /       \   \
+        /   /         \------\         /------/         \   \
+       /   /                  \       /                  \   \
+      /   /                    \     /                    \   \
+    [Leaf1]                    [leaf2]                    [Leaf3]
+ esi-001-leaf1              esi-001-leaf2              std-001-leaf1
+   |      \                     /     |                       | 
+   |       \-----\ (LACP) /----/      |                       | 
+   |              \      /            |                       | 
+   |               \    /             |                       |
+Single-Server-1   Dual-Server-1     Single-Server-2    Single-Server-3
+(esi-001-sys001)  (esi-001-sys002)  (esi-001-sys003)   (std-001-sys001)
+```
+
 ### Install the Provider
 Refer to the project's [main README](../README.md) to get the provider installed
 on your system or to the centos_1 server as below.
@@ -110,7 +135,7 @@ laptop:github\terraform\terraform-apstra> scp main.tf root@centos1:terraform/
 
 Centos1:> yum install -y yum-utils
 Centos1:> yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-Centos1:> yum -y install terraform
+Centos1:> yum -y install terraform expect
 Centos1:> yum update
 Centos1:> mkdir terraform
 Centos1:> cd terraform
@@ -123,11 +148,12 @@ Centos1:> terraform destroy -auto-approve
 ```
 
 ### Before applying terraform script update the base cofnig in vEX / vQFX-10K via cli
+### (Specific to VMM Environment and already in-buit into the terraform scripts)
 ```
 vEX-9214> cli
   configure
-  set chassis evpn-vxlan-default-switch-support
   set groups member0 system host-name <switch-host-name>
+  set chassis evpn-vxlan-default-switch-support
   set system commit synchronize 
   set system services netconf ssh 
   delete groups global interfaces lo0 
@@ -147,6 +173,14 @@ vQFX-10K> cli
   show interfaces em0 | grep Hardware
 
 ```
+### Create Agent Profile "profile_juniper_vqfx" from Apstra Web UI with login credential of vEX/vQFX switches
+Login to Apstra Web UI: 
+1. Create Agent Profile named "profile_juniper_vqfx" with login credential of vEX/vQFX switches before executing the terraform script.
+
+### Work through the files in numerical order for further customization
+Each terraform configuration file after provider config is 100% customizable. Work through the file main.tf in order, un-commenting/commenting one `resource` or
+`data`(source) at a time. Compare the results with the lab guide and with the
+Apstra web UI.
 
 ### Work through the files in numerical order for further customization
 Each terraform configuration file after provider config is 100% customizable. Work through the file main.tf in order, un-commenting/commenting one `resource` or
