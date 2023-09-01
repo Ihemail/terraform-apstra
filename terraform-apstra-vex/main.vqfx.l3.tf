@@ -9,13 +9,12 @@ terraform {
 }
 
 provider "apstra" {
-  url = "https://10.220.29.233"                              # required
-  #url = "https://admin:AOSServer%401024@127.0.0.1"           # required
+  url = "https://10.220.29.233"                                 # required
+  #url = "https://admin:AOSServer%401024@127.0.0.1:xxxx"        # required
   tls_validation_disabled = true         # optional
   blueprint_mutex_disabled = true        # Don't attempt worry about competing clients
   # export APSTRA_USER="admin" && export APSTRA_PASS="AOSserver@1024"
 }
-
 
 # ASN pools, IPv4 pools and switch devices will be allocated using looping
 # resources. These three `local` maps are what we'll loop over.
