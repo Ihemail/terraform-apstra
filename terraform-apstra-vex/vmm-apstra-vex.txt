@@ -191,7 +191,7 @@ config "Apstra_vEX_DC_L2" {
   VMX_CHASSIS_START()
     VMX_RE_START(vex_spine1, 0)
         VMX_RE_INSTANCE(vex_spine1, VEX_DISK1, VMX_RE_I2CID, 0)
-          interface "vio0" { bridge "external"; macaddr "00:00:00:aa:aa:aa";};
+          //interface "vio0" { bridge "external"; macaddr "00:00:00:aa:aa:aa";};
     VMX_RE_END
     VMX_MPC_START(vex_spine1_mpc, 0)
         VMX_MPC_INSTANCE(vex_spine1_mpc, VEX_DISK1, VMX_MPC_I2CID, 0)
@@ -210,7 +210,7 @@ config "Apstra_vEX_DC_L2" {
   VMX_CHASSIS_START()
     VMX_RE_START(vex_spine2, 0)
         VMX_RE_INSTANCE(vex_spine2, VEX_DISK1, VMX_RE_I2CID, 0)
-          interface "vio0" { bridge "external"; macaddr "00:00:00:aa:bb:bb";};
+          //interface "vio0" { bridge "external"; macaddr "00:00:00:aa:bb:bb";};
     VMX_RE_END
     VMX_MPC_START(vex_spine2_mpc, 0)
         VMX_MPC_INSTANCE(vex_spine2_mpc, VEX_DISK1, VMX_MPC_I2CID, 0)
@@ -229,7 +229,7 @@ config "Apstra_vEX_DC_L2" {
   VMX_CHASSIS_START()
     VMX_RE_START(vex_leaf1, 0)
         VMX_RE_INSTANCE(vex_leaf1, VEX_DISK1, VMX_RE_I2CID, 0)
-          interface "vio0" { bridge "external"; macaddr "00:00:00:aa:11:11";};
+          //interface "vio0" { bridge "external"; macaddr "00:00:00:aa:11:11";};
     VMX_RE_END
     VMX_MPC_START(vex_leaf1_mpc, 0)
         VMX_MPC_INSTANCE(vex_leaf1_mpc, VEX_DISK1, VMX_MPC_I2CID, 0)
@@ -248,7 +248,7 @@ config "Apstra_vEX_DC_L2" {
   VMX_CHASSIS_START()
     VMX_RE_START(vex_leaf2, 0)
         VMX_RE_INSTANCE(vex_leaf2, VEX_DISK1, VMX_RE_I2CID, 0)
-          interface "vio0" { bridge "external"; macaddr "00:00:00:aa:22:22";};
+          //interface "vio0" { bridge "external"; macaddr "00:00:00:aa:22:22";};
     VMX_RE_END
     VMX_MPC_START(vex_leaf2_mpc, 0)
         VMX_MPC_INSTANCE(vex_leaf2_mpc, VEX_DISK1, VMX_MPC_I2CID, 0)
@@ -267,7 +267,7 @@ config "Apstra_vEX_DC_L2" {
   VMX_CHASSIS_START()
     VMX_RE_START(vex_leaf3, 0)
         VMX_RE_INSTANCE(vex_leaf3, VEX_DISK1, VMX_RE_I2CID, 0)
-          interface "vio0" { bridge "external"; macaddr "00:00:00:aa:33:33";};
+         // interface "vio0" { bridge "external"; macaddr "00:00:00:aa:33:33";};
     VMX_RE_END
     VMX_MPC_START(vex_leaf3_mpc, 0)
         VMX_MPC_INSTANCE(vex_leaf3_mpc, VEX_DISK1, VMX_MPC_I2CID, 0)
