@@ -110,11 +110,6 @@ resource "apstra_logical_device" "vex_switch" {
           port_roles = ["superspine", "spine", "leaf", "access", "peer", "generic"]
         },
         #{
-        #  port_count = 4
-        #  port_speed = "10G"
-        #  port_roles = ["superspine", "spine", "leaf", "access", "peer", "generic"]
-        #},
-        #{
         #  port_count = 10
         #  port_speed = "10G"
         #  port_roles = ["superspine", "spine", "leaf"]
