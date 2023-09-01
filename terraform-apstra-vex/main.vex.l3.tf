@@ -15,21 +15,26 @@ provider "apstra" {
   # export APSTRA_USER="admin" && export APSTRA_PASS="AOSserver@1024"
 }
 
-resource "apstra_ipv4_pool" "lab1" {
-  name = "lab_dc1_vex_ip_pool"
-  subnets = [
-    { network = "10.2.0.0/16" },
-  ]
-}
-
-resource "apstra_asn_pool" "lab1" {
-  name = "lab_dc1_vex_asn_pool"
-  ranges = [
-    {
-      first = 64500
-      last = 65500
-    },
-  ]
+# ASN pools, IPv4 pools and switch devices will be allocated using looping
+# resources. These three `local` maps are what we'll loop over.
+locals {
+  asn_pools = {
+    spine_asns = ["Private-64512-65534"]
+    leaf_asns  = ["Private-4200000000-4294967294"]
+  }
+  ipv4_pools = {
+    spine_loopback_ips  = ["Private-10_0_0_0-8"]
+    leaf_loopback_ips   = ["Private-10_0_0_0-8"]
+    spine_leaf_link_ips = ["Private-10_0_0_0-8"]
+  }
+  switches = {
+    spine1               = { management_ip = "10.206.197.61", device_key = "54040ACEC53D", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine1" }
+    spine2               = { management_ip = "10.206.224.7", device_key = "54040ACEE007", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine2" }
+    vex_esi_001_leaf1    = { management_ip = "10.206.224.21", device_key = "54040ACEE015", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-esi-001-leaf1-3" }
+    vex_esi_001_leaf2    = { management_ip = "10.206.209.152", device_key = "54040ACED198", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-esi-001-leaf2-3" }
+    vex_std_001_leaf1    = { management_ip = "10.206.206.179", device_key = "54040ACECEB3", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-std-001-leaf1-3" }
+    ## device_key = mac-address of interface "em0"[vqfx-10k] or "fxp0"[vEX-9214]
+  }
 }
 
 resource "null_resource" "hostname_change_with_options" {
@@ -59,7 +64,6 @@ resource "null_resource" "hostname_change_with_options" {
      echo 'expect ":~ #"' >> ${each.value.hostname}.exp  
      echo 'send "exit\r"' >> ${each.value.hostname}.exp && echo "Hello World!!"
      EOT
-
      #command = "echo '#!/usr/bin/expect --' >> ${each.value.hostname}.exp && echo 'spawn ssh root@${each.value.management_ip}' >> ${each.value.hostname}.exp && echo 'expect \"Password:\"' >> ${each.value.hostname}.exp && echo 'send \"Embe1mpls\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"%\"' >> ${each.value.hostname}.exp && echo 'send \"cli\\r\"' >> ${each.value.hostname}.exp && echo 'expect \">\"' >> ${each.value.hostname}.exp && echo 'send \"configure\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"#\"' >> ${each.value.hostname}.exp && echo 'send \"set groups member0 system host-name ${each.value.hostname}\\r\"' >> ${each.value.hostname}.exp && echo 'send \"set chassis evpn-vxlan-default-switch-support\\r\"' >> ${each.value.hostname}.exp &&  echo 'send \"set system commit synchronize\\r\"' >> ${each.value.hostname}.exp && echo 'send \"set system services netconf ssh\\r\"' >> ${each.value.hostname}.exp && echo 'send \"delete groups global interfaces lo0\\r\"' >> ${each.value.hostname}.exp && echo 'send \"delete groups global routing-options router-id\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"#\"' >> ${each.value.hostname}.exp && echo 'send \"commit and-quit\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"^commit complete$\"' >> ${each.value.hostname}.exp && echo 'send \"exit\\r\"' >> ${each.value.hostname}.exp && echo 'expect \":~ #\"' >> ${each.value.hostname}.exp && echo 'send \"exit\\r\"' >> ${each.value.hostname}.exp "
   }
   provisioner "local-exec" {
@@ -72,8 +76,23 @@ resource "null_resource" "delete_hostname_scripts" {
   depends_on = [null_resource.hostname_change_with_options]
   provisioner "local-exec" {
     command = " ping 127.0.0.1 -i 1 -c 20 && rm -rf spine*.exp && rm -rf vex*-00*.exp"
-    
   }
+}
+
+resource "apstra_ipv4_pool" "lab1" {
+  name = "lab_dc1_vex_ip_pool"
+  subnets = [
+    { network = "10.2.0.0/16" },
+  ]
+}
+resource "apstra_asn_pool" "lab1" {
+  name = "lab_dc1_vex_asn_pool"
+  ranges = [
+    {
+      first = 64500
+      last = 65500
+    },
+  ]
 }
 
 # Look up details of a preconfigured logical device using its name. We'll use
@@ -202,7 +221,6 @@ resource "apstra_rack_type" "lab1_esi" {
   }
 }
 
-
 ## Create a template using previously looked-up (data) spine info and previously
 ## created (resource) rack types.
 resource "apstra_template_rack_based" "lab1" {
@@ -218,28 +236,6 @@ resource "apstra_template_rack_based" "lab1" {
   rack_infos = {
     (apstra_rack_type.lab1_esi.id)    = { count = 1 }
     (apstra_rack_type.lab1_single.id) = { count = 1 }
-  }
-}
-
-# ASN pools, IPv4 pools and switch devices will be allocated using looping
-# resources. These three `local` maps are what we'll loop over.
-locals {
-  asn_pools = {
-    spine_asns = ["Private-64512-65534"]
-    leaf_asns  = ["Private-4200000000-4294967294"]
-  }
-  ipv4_pools = {
-    spine_loopback_ips  = ["Private-10_0_0_0-8"]
-    leaf_loopback_ips   = ["Private-10_0_0_0-8"]
-    spine_leaf_link_ips = ["Private-10_0_0_0-8"]
-  }
-  switches = {
-    spine1               = { management_ip = "10.206.197.61", device_key = "54040ACEC53D", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine1" }
-    spine2               = { management_ip = "10.206.224.7", device_key = "54040ACEE007", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine2" }
-    vex_esi_001_leaf1    = { management_ip = "10.206.224.21", device_key = "54040ACEE015", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-esi-001-leaf1-3" }
-    vex_esi_001_leaf2    = { management_ip = "10.206.209.152", device_key = "54040ACED198", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-esi-001-leaf2-3" }
-    vex_std_001_leaf1    = { management_ip = "10.206.206.179", device_key = "54040ACECEB3", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vex-std-001-leaf1-3" }
-    ## device_key = mac-address of interface "em0"[vqfx-10k] or "fxp0"[vEX-9214]
   }
 }
 
