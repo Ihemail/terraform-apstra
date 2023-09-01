@@ -16,21 +16,27 @@ provider "apstra" {
   # export APSTRA_USER="admin" && export APSTRA_PASS="AOSserver@1024"
 }
 
-resource "apstra_ipv4_pool" "lab1" {
-  name = "lab_dc1_vqfx_ip_pool"
-  subnets = [
-    { network = "10.2.0.0/16" },
-  ]
-}
 
-resource "apstra_asn_pool" "lab1" {
-  name = "lab_dc1_vqfx_asn_pool"
-  ranges = [
-    {
-      first = 64500
-      last = 65500
-    },
-  ]
+# ASN pools, IPv4 pools and switch devices will be allocated using looping
+# resources. These three `local` maps are what we'll loop over.
+locals {
+  #asn_pools = {
+  #  spine_asns = ["Private-64512-65534"]
+  #  leaf_asns  = ["Private-4200000000-4294967294"]
+  #}
+  ipv4_pools = {
+    spine_loopback_ips  = ["Private-10_0_0_0-8"]
+    leaf_loopback_ips   = ["Private-10_0_0_0-8"]
+    spine_leaf_link_ips = ["Private-10_0_0_0-8"]
+  }
+  switches = {
+    spine1             = { management_ip = "10.207.194.169", device_key = "000000AAAAAA", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine1" }
+    spine2             = { management_ip = "10.207.199.145", device_key = "000000AABBBB", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine2" }
+    vqfx_esi_001_leaf1 = { management_ip = "10.207.211.205", device_key = "000000AA1111", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-esi-001-leaf1" }
+    vqfx_esi_001_leaf2 = { management_ip = "10.207.208.78", device_key = "000000AA2222", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-esi-001-leaf2" }
+    vqfx_std_001_leaf1 = { management_ip = "10.207.193.114", device_key = "000000AA3333", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-std-001-leaf1" }
+    ## device_key = mac-address of interface "em0"[vqfx-10k] or "fxp0"[vEX-9214]
+  }
 }
 
 resource "null_resource" "hostname_change_with_options" {
@@ -60,7 +66,6 @@ resource "null_resource" "hostname_change_with_options" {
      echo 'expect ":~ #"' >> ${each.value.hostname}.exp  
      echo 'send "exit\r"' >> ${each.value.hostname}.exp && echo "Hello World!!"
      EOT
-
      #command = "echo '#!/usr/bin/expect --' >> ${each.value.hostname}.exp && echo 'spawn ssh root@${each.value.management_ip}' >> ${each.value.hostname}.exp && echo 'expect \"Password:\"' >> ${each.value.hostname}.exp && echo 'send \"Embe1mpls\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"%\"' >> ${each.value.hostname}.exp && echo 'send \"cli\\r\"' >> ${each.value.hostname}.exp && echo 'expect \">\"' >> ${each.value.hostname}.exp && echo 'send \"configure\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"#\"' >> ${each.value.hostname}.exp && echo 'send \"set groups member0 system host-name ${each.value.hostname}\\r\"' >> ${each.value.hostname}.exp && echo 'send \"set chassis evpn-vxlan-default-switch-support\\r\"' >> ${each.value.hostname}.exp &&  echo 'send \"set system commit synchronize\\r\"' >> ${each.value.hostname}.exp && echo 'send \"set system services netconf ssh\\r\"' >> ${each.value.hostname}.exp && echo 'send \"delete groups global interfaces lo0\\r\"' >> ${each.value.hostname}.exp && echo 'send \"delete groups global routing-options router-id\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"#\"' >> ${each.value.hostname}.exp && echo 'send \"commit and-quit\\r\"' >> ${each.value.hostname}.exp && echo 'expect \"^commit complete$\"' >> ${each.value.hostname}.exp && echo 'send \"exit\\r\"' >> ${each.value.hostname}.exp && echo 'expect \":~ #\"' >> ${each.value.hostname}.exp && echo 'send \"exit\\r\"' >> ${each.value.hostname}.exp "
   }
   provisioner "local-exec" {
@@ -77,6 +82,21 @@ resource "null_resource" "delete_hostname_scripts" {
   }
 }
 
+resource "apstra_ipv4_pool" "lab1" {
+  name = "lab_dc1_vqfx_ip_pool"
+  subnets = [
+    { network = "10.2.0.0/16" },
+  ]
+}
+resource "apstra_asn_pool" "lab1" {
+  name = "lab_dc1_vqfx_asn_pool"
+  ranges = [
+    {
+      first = 64500
+      last = 65500
+    },
+  ]
+}
 
 # Look up details of a preconfigured logical device using its name. We'll use
 # data discovered in this lookup in the resource creation below.
@@ -209,28 +229,6 @@ resource "apstra_template_rack_based" "lab1_vqfx" {
   rack_infos = {
     (apstra_rack_type.lab1_esi.id)    = { count = 1 }
     (apstra_rack_type.lab1_single.id) = { count = 1 }
-  }
-}
-
-# ASN pools, IPv4 pools and switch devices will be allocated using looping
-# resources. These three `local` maps are what we'll loop over.
-locals {
-  #asn_pools = {
-  #  spine_asns = ["Private-64512-65534"]
-  #  leaf_asns  = ["Private-4200000000-4294967294"]
-  #}
-  ipv4_pools = {
-    spine_loopback_ips  = ["Private-10_0_0_0-8"]
-    leaf_loopback_ips   = ["Private-10_0_0_0-8"]
-    spine_leaf_link_ips = ["Private-10_0_0_0-8"]
-  }
-  switches = {
-    spine1             = { management_ip = "10.207.194.169", device_key = "000000AAAAAA", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine1" }
-    spine2             = { management_ip = "10.207.199.145", device_key = "000000AABBBB", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Spine", hostname = "spine2" }
-    vqfx_esi_001_leaf1 = { management_ip = "10.207.211.205", device_key = "000000AA1111", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-esi-001-leaf1" }
-    vqfx_esi_001_leaf2 = { management_ip = "10.207.208.78", device_key = "000000AA2222", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-esi-001-leaf2" }
-    vqfx_std_001_leaf1 = { management_ip = "10.207.193.114", device_key = "000000AA3333", initial_interface_map_id = "Juniper_vQFX__AOS-7x10-Leaf", hostname = "vqfx-std-001-leaf1" }
-    ## device_key = mac-address of interface "em0"[vqfx-10k] or "fxp0"[vEX-9214]
   }
 }
 
