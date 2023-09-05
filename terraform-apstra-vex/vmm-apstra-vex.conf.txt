@@ -11,7 +11,7 @@ elpod3-vmm:~> cat homes/vmm-apstra-tf-vex.conf
 
 #define OPENWRT_base basedisk "/vmm/data/user_disks/ihazra/lede-disk0.vmdk";
 //#define AOS_SERVER_BASE basedisk "/vmm/data/user_disks/ihazra/images/aos_server_4.1.2-disk1.vmdk";
-#define AOS_SERVER_BASE basedisk "/vmm/data/user_disks/ihazra/images/aos-server.qcow2";
+#define AOS_SERVER_BASE basedisk "/vmm/data/user_disks/ihazra/images/aos_server_4.1.2.qcow2";
 //#define AOS_ZTP_BASE basedisk "/vmm/data/user_disks/ihazra/contrail/apstra-ztp-4.0.1.vmdk";
 
 config "Apstra_vEX_DC_L2" {
